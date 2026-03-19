@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colegio Excelencia | Kinder, Primaria y Secundaria</title>
+    <meta name="description" content="Colegio privado de excelencia en México. Formación bilingüe e integral para Kinder, Primaria y Secundaria. ¡Inscripciones abiertas!">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #c5a059;
+            --accent: #2c5282;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --white: #ffffff;
+            --bg-light: #f8fafc;
+            --success: #25d366;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-color: var(--white);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- UI Elements --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            gap: 8px;
+        }
+
+        .btn-primary { background: var(--secondary); color: var(--white); }
+        .btn-primary:hover { background: #b08d4a; transform: translateY(-2px); }
+
+        .btn-secondary { background: var(--success); color: var(--white); }
+        .btn-tertiary { background: transparent; border: 2px solid var(--white); color: var(--white); }
+        .btn-tertiary:hover { background: var(--white); color: var(--primary); }
+
+        .subtitle {
+            text-transform: uppercase;
+            color: var(--secondary);
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--white);
+            height: 80px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            height: 70px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo strong { color: var(--secondary); }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover { color: var(--secondary); }
+
+        .nav-links .platform-link {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        /* --- Hero --- */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(26, 54, 93, 0.7), rgba(26, 54, 93, 0.5)), 
+                        url('https://images.unsplash.com/photo-1523050335392-9affa74242c2?q=80&w=2070&auto=format&fit=crop') center/cover;
+            display: flex;
+            align-items: center;
+            color: var(--white);
+            text-align: left;
+            padding-top: 80px;
+        }
+
+        .hero-content {
+            max-width: 750px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            margin-bottom: 35px;
+            opacity: 0.9;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .hero .tagline {
+            margin-top: 40px;
+            font-style: italic;
+            border-left: 4px solid var(--secondary);
+            padding-left: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* --- Sections --- */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* --- Nosotros --- */
+        .nosotros-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .nosotros-img {
+            position: relative;
+        }
+
+        .nosotros-img img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 20px 20px 0 var(--secondary);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .value-card {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .value-card h4 { margin-bottom: 5px; }
+
+        /* --- Niveles --- */
+        .niveles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .nivel-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-bottom: 5px solid transparent;
+        }
+
+        .nivel-card:hover {
+            transform: translateY(-10px);
+            border-bottom: 5px solid var(--secondary);
+        }
+
+        .nivel-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .nivel-content {
+            padding: 30px;
+        }
+
+        .nivel-content h3 { margin-bottom: 15px; }
+
+        .nivel-features {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .nivel-features li {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nivel-features li::before {
+            content: "✓";
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        /* --- Servicios --- */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .service-card {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--bg-light);
+            border-radius: 15px;
+            transition: var(--transition);
+        }
+
+        .service-card:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .service-card:hover h3 { color: var(--white); }
+
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* --- Instalaciones --- */
+        .carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            cursor: grab;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 500px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.8);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1.5rem;
+        }
+
+        .carousel-btn.prev { left: 20px; }
+        .carousel-btn.next { right: 20px; }
+
+        /* --- Periódico --- */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .news-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .news-thumb {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .news-body { padding: 25px; }
+        .news-date { font-size: 0.8rem; color: var(--text-light); }
+        .news-body h3 { margin: 10px 0; font-size: 1.2rem; }
+
+        /* --- Contacto --- */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 50px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .contact-info {
+            background: var(--primary);
+            color: var(--white);
+            padding: 50px;
+        }
+
+        .contact-info h2 { color: var(--white); margin-bottom: 30px; }
+
+        .info-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-item h4 { color: var(--secondary); font-size: 0.9rem; }
+        .info-item p { font-size: 1rem; }
+
+        .contact-form {
+            padding: 50px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: #0f172a;
+            color: var(--white);
+            padding: 80px 0 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand h3 { color: var(--white); margin-bottom: 20px; }
+        .footer-col h4 { color: var(--secondary); margin-bottom: 20px; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a { color: #94a3b8; text-decoration: none; transition: var(--transition); }
+        .footer-col ul li a:hover { color: var(--white); }
+
+        .footer-bottom {
+            border-top: 1px solid #1e293b;
+            padding-top: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        /* --- Widgets --- */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--success);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            text-decoration: none;
+            animation: pulse 2s infinite;
+        }
+
+        #map {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        /* Custom Modal Replacement for Alert */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .nosotros-grid, .contact-grid { grid-template-columns: 1fr; }
+            .niveles-grid, .news-grid { grid-template-columns: 1fr 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: var(--white);
+                flex-direction: column;
+                padding: 40px;
+                transition: 0.4s;
+            }
+
+            .nav-links.active { left: 0; }
+
+            .hamburger { display: flex; }
+            
+            .niveles-grid, .news-grid, .form-row { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+
+            .hero h1 { font-size: 2.5rem; }
+            .hero-btns { flex-direction: column; }
+            .hero-btns .btn { width: 100%; }
+
+            .contact-info, .contact-form { padding: 30px 20px; }
+            
+            .slide { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- WhatsApp Widget -->
+    <a href="#" class="whatsapp-float" onclick="notify('Redirigiendo a WhatsApp de informes...')">
+        <svg style="width:32px;height:32px" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42 1.56 1.56 2.41 3.63 2.41 5.83 0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.19-1.15l-.3-.17-3.12.82.83-3.04-.2-.32a8.188 8.188 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24M8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.86-.87 2.07 0 1.22.89 2.39 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28-.25-.13-1.47-.73-1.69-.81-.23-.08-.39-.12-.56.13-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.11-.56-1.35-.77-1.85-.2-.5-.4-.43-.56-.44-.14-.01-.31-.01-.47-.01Z" />
+        </svg>
+    </a>
+
+    <!-- Custom Notification Modal -->
+    <div id="msgModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Mensaje</h3>
+            <p id="modalBody" style="margin: 20px 0; color: var(--text-light);"></p>
+            <button class="btn btn-primary" onclick="closeModal()">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">COLEGIO <strong>EXCELENCIA</strong></a>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#nosotros">Nosotros</a></li>
+                    <li><a href="#niveles">Niveles</a></li>
+                    <li><a href="#instalaciones">Instalaciones</a></li>
+                    <li><a href="#noticias">Periódico</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                    <li><a href="#" class="platform-link" onclick="notify('Acceso a Plataforma Educativa (Próximamente)')">Plataforma</a></li>
+                    <li><a href="#contacto" class="btn btn-primary">Informes</a></li>
+                </ul>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <span class="subtitle" style="color: var(--white)">Bienvenidos al Futuro</span>
+                <h1>Educación con Valores y Excelencia Académica</h1>
+                <p>Brindamos una formación integral bilingüe, fomentando el liderazgo y la creatividad en cada etapa del desarrollo de tus hijos.</p>
+                <div class="hero-btns">
+                    <a href="#contacto" class="btn btn-primary">Solicitar Informes</a>
+                    <a href="#" class="btn btn-secondary" onclick="notify('Abriendo WhatsApp...')">WhatsApp</a>
+                    <a href="tel:+525500000000" class="btn btn-tertiary">Llamar Ahora</a>
+                </div>
+                <p class="tagline">"Donde el conocimiento se encuentra con el corazón."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nosotros Section -->
+    <section id="nosotros">
+        <div class="container">
+            <div class="nosotros-grid">
+                <div class="nosotros-text">
+                    <span class="subtitle">Nuestra Comunidad</span>
+                    <h2>Formando ciudadanos del mundo</h2>
+                    <p>En el <strong>Colegio Excelencia</strong>, creemos que la educación va más allá de los libros. Nuestra filosofía se basa en la <strong>Disciplina Positiva</strong> y el acompañamiento constante a las familias.</p>
+                    <p style="margin-top: 15px;">Contamos con más de 20 años de experiencia formando líderes con sentido ético y responsabilidad social.</p>
+                    
+                    <div class="values-grid">
+                        <div class="value-card">
+                            <h4>Misión</h4>
+                            <p>Desarrollar el potencial máximo de cada alumno en un ambiente seguro.</p>
+                        </div>
+                        <div class="value-card">
+                            <h4>Visión</h4>
+                            <p>Ser la institución líder en innovación educativa y calidez humana en México.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="nosotros-img">
+                    <img src="https://images.unsplash.com/photo-1648301033733-44554c74ec50?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Estudiantes en el colegio">
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Niveles Académicos -->
+    <section id="niveles" class="bg-light">
+        <div class="container">
+            <div class="section-title">
+                <span class="subtitle">Oferta Educativa</span>
+                <h2>Niveles Académicos</h2>
+                <p>Contamos con programas diseñados para cada etapa del crecimiento.</p>
+            </div>
+            <div class="niveles-grid">
+                <!-- Kinder -->
+                <div class="nivel-card">
+                    <div class="nivel-img" style="background-image: url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2022&auto=format&fit=crop')"></div>
+                    <div class="nivel-content">
+                        <h3>Kinder</h3>
+                        <p>Iniciamos el camino del aprendizaje a través del juego, la exploración y la estimulación temprana bilingüe.</p>
+                        <ul class="nivel-features">
+                            <li>Psicomotricidad</li>
+                            <li>Inmersión al Inglés</li>
+                            <li>Taller de Arte</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Primaria -->
+                <div class="nivel-card">
+                    <div class="nivel-img" style="background-image: url('https://images.unsplash.com/photo-1588072432836-e10032774350?q=80&w=2072&auto=format&fit=crop')"></div>
+                    <div class="nivel-content">
+                        <h3>Primaria</h3>
+                        <p>Fortalecemos el pensamiento lógico y la comprensión lectora con un enfoque tecnológico y humano.</p>
+                        <ul class="nivel-features">
+                            <li>Robótica Educativa</li>
+                            <li>Certificación Cambridge</li>
+                            <li>Deportes de Competencia</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Secundaria -->
+                <div class="nivel-card">
+                    <div class="nivel-img" style="background-image: url('https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=2070&auto=format&fit=crop')"></div>
+                    <div class="nivel-content">
+                        <h3>Secundaria</h3>
+                        <p>Preparamos a nuestros jóvenes para los retos globales, fomentando el liderazgo y el pensamiento crítico.</p>
+                        <ul class="nivel-features">
+                            <li>Laboratorios Avanzados</li>
+                            <li>Orientación Vocacional</li>
+                            <li>Inteligencia Emocional</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios -->
+    <section>
+        <div class="container">
+            <div class="section-title">
+                <span class="subtitle">Servicios Escolares</span>
+                <h2>Formación Integral</h2>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <span class="service-icon">🇬🇧</span>
+                    <h3>Bilingüe</h3>
+                    <p>Certificaciones internacionales desde niveles básicos.</p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">💻</span>
+                    <h3>Tecnología</h3>
+                    <p>Aulas equipadas y laboratorios de computación de vanguardia.</p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">⚽</span>
+                    <h3>Deportes</h3>
+                    <p>Futbol, Basquetbol y Voleibol en canchas profesionales.</p>
+                </div>
+                <div class="service-card">
+                    <span class="service-icon">👮</span>
+                    <h3>Seguridad</h3>
+                    <p>Circuito cerrado y control estricto de accesos 24/7.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instalaciones (Carousel) -->
+    <section id="instalaciones" class="bg-light">
+        <div class="container">
+            <div class="section-title">
+                <span class="subtitle">Nuestros Espacios</span>
+                <h2>Instalaciones de Vanguardia</h2>
+            </div>
+            <div class="carousel-wrapper">
+                <button class="carousel-btn prev" id="prevBtn">❮</button>
+                <div class="carousel-track" id="carousel">
+                    <!-- 10 Placeholder Slides -->
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1541339907198-e087563f2f1e?q=80&w=2070&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=2064&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1904&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1464938050520-ef2270bb8ce8?q=80&w=2074&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1519311965067-36d3e5f33d39?q=80&w=2071&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1491845339675-6f2ffd9a9781?q=80&w=2070&auto=format&fit=crop')"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1577412647305-991150c7d163?q=80&w=2070&auto=format&fit=crop')"></div>
+                </div>
+                <button class="carousel-btn next" id="nextBtn">❯</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Periódico Escolar -->
+    <section id="noticias">
+        <div class="container">
+            <div class="section-title">
+                <span class="subtitle">Noticias y Eventos</span>
+                <h2>Periódico Escolar</h2>
+            </div>
+            <div class="news-grid">
+                <article class="news-card">
+                    <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1544928147-79a2dbc1f389?q=80&w=1974&auto=format&fit=crop')"></div>
+                    <div class="news-body">
+                        <span class="news-date">15 Marzo, 2026</span>
+                        <h3>Feria de Ciencias 2026</h3>
+                        <p>Nuestros alumnos presentaron proyectos innovadores sobre sustentabilidad.</p>
+                    </div>
+                </article>
+                <article class="news-card">
+                    <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1737567427481-543c88189b2e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')"></div>
+                    <div class="news-body">
+                        <span class="news-date">10 Marzo, 2026</span>
+                        <h3>Éxito en Torneo de Debate</h3>
+                        <p>El equipo de secundaria obtuvo el primer lugar en la competencia intercolegial.</p>
+                    </div>
+                </article>
+                <article class="news-card">
+                    <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop')"></div>
+                    <div class="news-body">
+                        <span class="news-date">05 Marzo, 2026</span>
+                        <h3>Próximo Festival de Primavera</h3>
+                        <p>Prepara tus disfraces para nuestro evento anual con toda la comunidad.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Por qué elegirnos -->
+    <section class="bg-light">
+        <div class="container">
+            <div class="section-title">
+                <h2>¿Por qué elegir Colegio Excelencia?</h2>
+            </div>
+            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                <div>
+                    <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=2069&auto=format&fit=crop" style="width: 100%; border-radius: 20px;" alt="Familia feliz">
+                </div>
+                <div>
+                    <ul class="nivel-features" style="font-size: 1.1rem;">
+                        <li style="margin-bottom: 20px;"><strong>Atención Personalizada:</strong> Grupos reducidos para garantizar el aprendizaje.</li>
+                        <li style="margin-bottom: 20px;"><strong>Docentes Certificados:</strong> Profesores con pasión y constante capacitación.</li>
+                        <li style="margin-bottom: 20px;"><strong>Ambiente Seguro:</strong> Priorizamos la integridad física y emocional de los alumnos.</li>
+                        <li style="margin-bottom: 20px;"><strong>Comunicación Cercana:</strong> App exclusiva para padres y atención inmediata.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contacto">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h2>Contáctanos</h2>
+                    <div class="info-item">
+                        <div>
+                            <h4>Ubicación</h4>
+                            <p>Av. Paseo de la Reforma 123, Col. Juarez, Ciudad de México.</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div>
+                            <h4>Teléfono</h4>
+                            <p>+52 (55) 1234 5678</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div>
+                            <h4>Email</h4>
+                            <p>informes@colegioexcelencia.edu.mx</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div>
+                            <h4>Horario</h4>
+                            <p>Lunes a Viernes: 7:30 AM - 3:30 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div id="map"></div>
+                </div>
+                <div class="contact-form">
+                    <h2>Solicitar Informes</h2>
+                    <p style="margin-bottom: 30px; color: var(--text-light);">Completa el formulario y un asesor educativo te contactará pronto.</p>
+                    <form id="infoForm">
+                        <div class="form-group">
+                            <label>Nombre del Padre o Tutor</label>
+                            <input type="text" placeholder="Ej. Juan Pérez" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Teléfono (WhatsApp)</label>
+                                <input type="tel" placeholder="55 1234 5678" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Correo Electrónico</label>
+                                <input type="email" placeholder="juan@ejemplo.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nivel de Interés</label>
+                            <select required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="kinder">Kinder</option>
+                                <option value="primaria">Primaria</option>
+                                <option value="secundaria">Secundaria</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensaje Adicional</label>
+                            <textarea rows="4" placeholder="¿Tienes alguna duda en particular?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Enviar Solicitud</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>COLEGIO EXCELENCIA</h3>
+                    <p>Comprometidos con la formación integral de los líderes del mañana en un entorno seguro y cálido.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Menú Rápido</h4>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#niveles">Niveles</a></li>
+                        <li><a href="#noticias">Noticias</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#" onclick="notify('Aviso de Privacidad')">Aviso de Privacidad</a></li>
+                        <li><a href="#" onclick="notify('Términos y Condiciones')">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Redes Sociales</h4>
+                    <ul>
+                        <li><a href="#">Facebook</a></li>
+                        <li><a href="#">Instagram</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Colegio Excelencia. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // --- Mobile Menu ---
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('open');
+        });
+
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('open');
+            });
+        });
+
+        // --- Header Scroll Effect ---
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // --- Carousel Logic ---
+        const track = document.getElementById('carousel');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        let index = 0;
+
+        function updateCarousel() {
+            const slideWidth = track.querySelector('.slide').clientWidth;
+            track.style.transform = `translateX(-${index * slideWidth}px)`;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            index = (index + 1) % 10;
+            updateCarousel();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            index = (index - 1 + 10) % 10;
+            updateCarousel();
+        });
+
+        window.addEventListener('resize', updateCarousel);
+
+        // --- Map Init (Leaflet) ---
+        // Coordenadas aproximadas de CDMX (Reforma)
+        const map = L.map('map', {
+            scrollWheelZoom: false
+        }).setView([19.4271, -99.1575], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([19.4271, -99.1575]).addTo(map)
+            .bindPopup('<b>Colegio Excelencia</b><br>¡Visítanos!')
+            .openPopup();
+
+        // --- Notification Logic ---
+        function notify(msg) {
+            document.getElementById('modalTitle').innerText = "Información";
+            document.getElementById('modalBody').innerText = msg;
+            document.getElementById('msgModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('msgModal').style.display = 'none';
+        }
+
+        // --- Form Submission ---
+        document.getElementById('infoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            notify("¡Gracias por tu interés! Hemos recibido tu solicitud. Un asesor educativo se pondrá en contacto contigo en las próximas 24 horas hábiles.");
+            e.target.reset();
+        });
+
+        // Swipe Support for Carousel (Simple)
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        track.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        track.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) {
+                nextBtn.click();
+            } else if (touchEndX - touchStartX > 50) {
+                prevBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
